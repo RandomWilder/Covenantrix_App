@@ -301,7 +301,7 @@ app.on('before-quit', () => {
   backend.stop();
 });
 
-// IPC handlers
+// EXISTING IPC handlers
 ipcMain.handle('test-backend', async () => {
   try {
     const response = await fetch(`http://${PYTHON_HOST}:${PYTHON_PORT}/health`);
@@ -322,6 +322,46 @@ ipcMain.handle('test-llm', async (event, query) => {
       body: JSON.stringify({ query })
     });
     
+    const data = await response.json();
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// NEW API Key management handlers
+ipcMain.handle('validate-api-key', async (event, apiKey) => {
+  try {
+    const response = await fetch(`http://${PYTHON_HOST}:${PYTHON_PORT}/api-key/validate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ api_key: apiKey })
+    });
+    
+    const data = await response.json();
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('check-api-key-status', async () => {
+  try {
+    const response = await fetch(`http://${PYTHON_HOST}:${PYTHON_PORT}/api-key/status`);
+    const data = await response.json();
+    return { success: true, data };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('remove-api-key', async () => {
+  try {
+    const response = await fetch(`http://${PYTHON_HOST}:${PYTHON_PORT}/api-key`, {
+      method: 'DELETE'
+    });
     const data = await response.json();
     return { success: true, data };
   } catch (error) {

@@ -26,6 +26,15 @@ except ImportError as e:
     print("pip install fastapi uvicorn pydantic")
     sys.exit(1)
 
+# Import API Key Manager (new addition)
+try:
+    from api_key_manager import APIKeyManager, APIKeyRequest, APIKeyResponse
+except ImportError as e:
+    print(f"Warning: API Key Manager not available: {e}")
+    APIKeyManager = None
+    APIKeyRequest = None
+    APIKeyResponse = None
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -37,7 +46,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Covenantrix Backend",
     description="Contract Intelligence Platform Backend",
-    version="0.1.0"
+    version="0.2.0"
 )
 
 # Add CORS middleware
@@ -70,6 +79,9 @@ class HealthResponse(BaseModel):
 # Global state
 startup_time = datetime.now()
 
+# Initialize API Key Manager (new addition)
+api_key_manager = APIKeyManager() if APIKeyManager else None
+
 @app.on_event("startup")
 async def startup_event():
     logger.info("🚀 Covenantrix Backend starting up...")
@@ -83,6 +95,12 @@ async def startup_event():
         logger.info("✅ AI dependencies available")
     else:
         logger.warning("⚠️  AI dependencies not available (development mode)")
+    
+    # Check API Key Manager availability
+    if api_key_manager:
+        logger.info("✅ API Key Manager initialized")
+    else:
+        logger.warning("⚠️  API Key Manager not available")
     
     logger.info("✅ Backend startup complete!")
 
@@ -114,6 +132,84 @@ def check_ai_dependencies() -> Dict[str, Any]:
         "dependencies": dependencies
     }
 
+# NEW API KEY ENDPOINTS
+@app.post("/api-key/validate", response_model=APIKeyResponse)
+async def validate_api_key(request: APIKeyRequest):
+    """Validate OpenAI API key"""
+    if not api_key_manager:
+        raise HTTPException(status_code=503, detail="API Key Manager not available")
+    
+    start_time = datetime.now()
+    
+    try:
+        if not request.api_key or not request.api_key.strip():
+            raise HTTPException(status_code=400, detail="API key cannot be empty")
+        
+        # Validate the key
+        result = await api_key_manager.validate_openai_key(request.api_key.strip())
+        
+        # If valid, save it
+        if result.is_valid:
+            saved = api_key_manager.save_api_key(request.api_key.strip())
+            if not saved:
+                logger.warning("API key validation succeeded but saving failed")
+        
+        processing_time = (datetime.now() - start_time).total_seconds()
+        logger.info(f"API key validation completed in {processing_time:.2f}s - Valid: {result.is_valid}")
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"API key validation error: {e}")
+        raise HTTPException(status_code=500, detail=f"Validation failed: {str(e)}")
+
+@app.get("/api-key/status")
+async def get_api_key_status():
+    """Check if API key is configured"""
+    if not api_key_manager:
+        raise HTTPException(status_code=503, detail="API Key Manager not available")
+    
+    try:
+        is_configured = api_key_manager.is_key_configured()
+        
+        # If configured, test if it's still valid
+        is_valid = False
+        if is_configured:
+            stored_key = api_key_manager.load_api_key()
+            if stored_key:
+                validation_result = await api_key_manager.validate_openai_key(stored_key)
+                is_valid = validation_result.is_valid
+        
+        return {
+            "configured": is_configured,
+            "valid": is_valid,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"API key status check error: {e}")
+        raise HTTPException(status_code=500, detail=f"Status check failed: {str(e)}")
+
+@app.delete("/api-key")
+async def remove_api_key():
+    """Remove stored API key"""
+    if not api_key_manager:
+        raise HTTPException(status_code=503, detail="API Key Manager not available")
+    
+    try:
+        removed = api_key_manager.remove_api_key()
+        if removed:
+            return {"message": "API key removed successfully"}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to remove API key")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"API key removal error: {e}")
+        raise HTTPException(status_code=500, detail=f"Removal failed: {str(e)}")
+
+# EXISTING ENDPOINTS
 @app.get("/health", response_model=HealthResponse)
 async def health_check():
     """Health check endpoint - verifies backend is running correctly"""
@@ -178,12 +274,15 @@ async def root():
     
     return {
         "message": "Covenantrix Backend API",
-        "version": "0.1.0",
+        "version": "0.2.0",
         "status": "running",
         "uptime_seconds": uptime.total_seconds(),
         "endpoints": {
             "health": "/health",
             "test_llm": "/test-llm",
+            "api_key_validate": "/api-key/validate",
+            "api_key_status": "/api-key/status",
+            "api_key_remove": "/api-key",
             "docs": "/docs"
         }
     }
@@ -206,6 +305,10 @@ async def get_status():
             "working_directory": os.getcwd()
         },
         "ai_capabilities": ai_deps,
+        "api_key_manager": {
+            "available": api_key_manager is not None,
+            "configured": api_key_manager.is_key_configured() if api_key_manager else False
+        },
         "memory_usage": {
             "available": True,
             "details": "Memory tracking not implemented"

@@ -96,7 +96,7 @@ body {
 }
 
 /* Panels */
-.info-panel, .status-panel, .ai-panel, .logs-panel {
+.info-panel, .status-panel, .ai-panel, .logs-panel, .api-key-panel {
     background: #f8f9fa;
     border-radius: 12px;
     padding: 25px;
@@ -104,13 +104,17 @@ body {
     border: 1px solid #e9ecef;
 }
 
-.info-panel h2, .status-panel h2, .ai-panel h2, .logs-panel h2 {
+.info-panel h2, .status-panel h2, .ai-panel h2, .logs-panel h2, .api-key-panel h2 {
     color: #2c3e50;
     margin-bottom: 20px;
     font-size: 20px;
     font-weight: 600;
     border-bottom: 2px solid #3498db;
     padding-bottom: 10px;
+}
+
+.api-key-panel h2 {
+    border-bottom-color: #e67e22;
 }
 
 /* Info Grid */
@@ -132,6 +136,130 @@ body {
 
 .info-item strong {
     color: #34495e;
+}
+
+/* API Key Panel Styles */
+.api-key-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.api-key-status-section {
+    display: flex;
+    justify-content: center;
+}
+
+.api-key-status {
+    padding: 12px 20px;
+    border-radius: 20px;
+    font-weight: 500;
+    text-align: center;
+    min-width: 200px;
+}
+
+.api-key-status.not-configured {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+.api-key-status.configured {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.api-key-status.invalid {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.api-key-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.api-key-input {
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    transition: border-color 0.3s;
+}
+
+.api-key-input:focus {
+    outline: none;
+    border-color: #e67e22;
+}
+
+.api-key-help {
+    background: #e8f4fd;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 4px solid #3498db;
+}
+
+.api-key-help small {
+    color: #2c3e50;
+    line-height: 1.4;
+}
+
+.api-key-help a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+.api-key-help a:hover {
+    text-decoration: underline;
+}
+
+.remove-button {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: background 0.3s;
+}
+
+.remove-button:hover {
+    background: #c0392b;
+}
+
+.remove-button:disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+}
+
+.api-key-message {
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.api-key-message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.api-key-message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.api-key-message.info {
+    background: #e8f4fd;
+    color: #31708f;
+    border: 1px solid #bee5eb;
 }
 
 /* Status Content */
