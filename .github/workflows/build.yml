@@ -1,0 +1,245 @@
+name: Build and Release Covenantrix
+
+on:
+  push:
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Create GitHub release'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: win
+            arch: x64
+            python_url: https://www.python.org/ftp/python/3.11.6/python-3.11.6-embed-amd64.zip
+            python_exe: python.exe
+          - os: macos-latest
+            platform: mac
+            arch: x64
+            python_exe: bin/python
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+            python_exe: bin/python
+            
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install Node dependencies
+      run: npm ci
+      
+    - name: Create Python Distribution (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: bash
+      run: |
+        echo "Creating Windows Python distribution..."
+        mkdir -p dist/python-dist
+        
+        # Download embedded Python
+        curl -L -o python-embed.zip ${{ matrix.python_url }}
+        unzip python-embed.zip -d dist/python-dist/
+        
+        # Configure Python to find packages
+        echo "import sys; sys.path.append('.')" > dist/python-dist/sitecustomize.py
+        
+        # Download and install pip
+        curl -L https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+        dist/python-dist/python.exe get-pip.py --no-warn-script-location
+        
+        # Install required packages
+        dist/python-dist/python.exe -m pip install --no-warn-script-location fastapi uvicorn pydantic
+        
+        echo "Windows Python distribution created successfully"
+        
+    - name: Create Python Distribution (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        echo "Creating macOS Python distribution..."
+        python3 -m venv dist/python-dist
+        source dist/python-dist/bin/activate
+        
+        # Upgrade pip
+        pip install --upgrade pip
+        
+        # Install required packages
+        pip install fastapi uvicorn pydantic
+        
+        # Make the distribution relocatable
+        # Replace absolute paths with relative ones
+        find dist/python-dist -name "*.py" -type f -exec sed -i '' 's|'"$(pwd)"'/dist/python-dist|.|g' {} \; || true
+        
+        echo "macOS Python distribution created successfully"
+        
+    - name: Create Python Distribution (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        echo "Creating Linux Python distribution..."
+        python3 -m venv dist/python-dist
+        source dist/python-dist/bin/activate
+        
+        # Upgrade pip
+        pip install --upgrade pip
+        
+        # Install required packages
+        pip install fastapi uvicorn pydantic
+        
+        echo "Linux Python distribution created successfully"
+        
+    - name: Verify Python Distribution
+      shell: bash
+      run: |
+        echo "Verifying Python distribution..."
+        
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          dist/python-dist/python.exe --version
+          dist/python-dist/python.exe -c "import fastapi, uvicorn, pydantic; print('All packages imported successfully')"
+        else
+          dist/python-dist/bin/python --version
+          dist/python-dist/bin/python -c "import fastapi, uvicorn, pydantic; print('All packages imported successfully')"
+        fi
+        
+        echo "Python distribution verification completed"
+        
+    - name: Test Backend Script
+      shell: bash
+      run: |
+        echo "Testing backend script..."
+        
+        # Start backend in background
+        if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          dist/python-dist/python.exe backend/main.py &
+        else
+          dist/python-dist/bin/python backend/main.py &
+        fi
+        
+        BACKEND_PID=$!
+        echo "Backend started with PID: $BACKEND_PID"
+        
+        # Wait for backend to start
+        echo "Waiting for backend to start..."
+        for i in {1..30}; do
+          if curl -s http://127.0.0.1:8000/health > /dev/null 2>&1; then
+            echo "Backend is responding!"
+            break
+          fi
+          echo "Attempt $i/30: Backend not ready yet..."
+          sleep 2
+        done
+        
+        # Test the health endpoint
+        echo "Testing health endpoint..."
+        curl -s http://127.0.0.1:8000/health | head -c 200
+        
+        # Stop backend
+        kill $BACKEND_PID || true
+        sleep 2
+        
+        echo "Backend test completed"
+        
+    - name: Build Electron App
+      run: |
+        echo "Building Electron application for ${{ matrix.platform }}..."
+        npm run package:${{ matrix.platform }}
+        
+    - name: List build output
+      shell: bash
+      run: |
+        echo "Build output contents:"
+        ls -la dist/packaged/ || echo "No packaged output found"
+        find dist/packaged/ -type f -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" | head -10
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: covenantrix-${{ matrix.platform }}-${{ matrix.arch }}
+        path: |
+          dist/packaged/*.exe
+          dist/packaged/*.dmg
+          dist/packaged/*.AppImage
+          dist/packaged/*.zip
+          dist/packaged/*.tar.gz
+        retention-days: 30
+        
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.create_release == 'true'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts/
+        
+    - name: Display artifact structure
+      run: |
+        echo "Downloaded artifacts:"
+        find artifacts/ -type f | head -20
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.ref_name }}
+        name: Covenantrix ${{ github.ref_name }}
+        draft: false
+        prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
+        generate_release_notes: true
+        files: |
+          artifacts/**/*.exe
+          artifacts/**/*.dmg  
+          artifacts/**/*.AppImage
+          artifacts/**/*.zip
+          artifacts/**/*.tar.gz
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+  # Optional: Test the built applications
+  test:
+    needs: build
+    runs-on: ${{ matrix.os }}
+    if: false  # Disable for now, enable when we have proper tests
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+        
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: covenantrix-${{ matrix.os == 'windows-latest' && 'win' || matrix.os == 'macos-latest' && 'mac' || 'linux' }}-x64
+        path: test-app/
+        
+    - name: Test application startup
+      shell: bash
+      run: |
+        echo "Testing application startup..."
+        # Add startup tests here when ready
+        echo "Test placeholder - implement when tests are ready"

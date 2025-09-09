@@ -1,0 +1,61 @@
+# Dependencies
+node_modules/
+backend/__pycache__/
+backend/*.pyc
+backend/.pytest_cache/
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+
+# Python virtual environments
+venv/
+env/
+.venv/
+.env/
+
+# Python embedded distributions (created during build)
+python-embed.zip
+get-pip.py
+
+# Electron build cache
+.electron/
+.cache/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Runtime files
+*.pid
+
+# Temporary files
+tmp/
+temp/
+
+# Test outputs
+coverage/
+.nyc_output/
+junit.xml
+
+# Miscellaneous
+*.tgz
+*.tar.gz

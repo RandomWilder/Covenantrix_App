@@ -1,0 +1,99 @@
+{
+    "name": "covenantrix",
+    "version": "0.1.0",
+    "description": "Contract Intelligence Platform - Proof of Concept",
+    "main": "main.js",
+    "scripts": {
+      "start": "cross-env NODE_ENV=development electron .",
+      "dev": "cross-env NODE_ENV=development electron . --enable-logging",
+      "build": "echo 'Building application...'",
+      "package:win": "electron-builder --win --x64",
+      "package:mac": "electron-builder --mac",
+      "package:linux": "electron-builder --linux",
+      "package:all": "electron-builder --win --mac --linux",
+      "postinstall": "electron-builder install-app-deps",
+      "clean": "rimraf dist/",
+      "test-build": "npm run clean && npm run package:win"
+    },
+    "keywords": [
+      "contract",
+      "ai",
+      "legal",
+      "document",
+      "analysis"
+    ],
+    "author": "Asaf",
+    "license": "MIT",
+    "devDependencies": {
+      "electron": "^27.0.0",
+      "electron-builder": "^24.6.4",
+      "cross-env": "^7.0.3",
+      "rimraf": "^5.0.5"
+    },
+    "dependencies": {
+      "node-fetch": "^3.3.2"
+    },
+    "build": {
+      "appId": "com.covenantrix.contract-ai",
+      "productName": "Covenantrix",
+      "directories": {
+        "output": "dist/packaged"
+      },
+      "extraResources": [
+        {
+          "from": "dist/python-dist",
+          "to": "python-dist",
+          "filter": "**/*"
+        },
+        {
+          "from": "backend",
+          "to": "app-backend",
+          "filter": "**/*"
+        }
+      ],
+      "files": [
+        "main.js",
+        "preload.js",
+        "renderer/*.html",
+        "renderer/*.js",
+        "renderer/*.css",
+        "assets/**/*",
+        "node_modules/**/*",
+        "!backend/**/*",
+        "!dist/python-dist/**/*"
+      ],
+      "win": {
+        "target": {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        "icon": "assets/icon.ico",
+        "requestedExecutionLevel": "asInvoker"
+      },
+      "mac": {
+        "target": "dmg",
+        "icon": "assets/icon.icns",
+        "category": "public.app-category.business"
+      },
+      "linux": {
+        "target": "AppImage",
+        "icon": "assets/icon.png",
+        "category": "Office"
+      },
+      "nsis": {
+        "oneClick": false,
+        "allowToChangeInstallationDirectory": true,
+        "createDesktopShortcut": true,
+        "createStartMenuShortcut": true
+      },
+      "publish": {
+        "provider": "github",
+        "owner": "your-username",
+        "repo": "covenantrix"
+      }
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/your-username/covenantrix.git"
+    }
+  }

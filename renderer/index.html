@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval';">
+    <title>Covenantrix - Contract Intelligence Platform</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <h1>🏛️ Covenantrix</h1>
+                    <span class="subtitle">Contract Intelligence Platform - Proof of Concept</span>
+                </div>
+                <div class="status-section">
+                    <div class="status-indicator" id="statusIndicator">
+                        <div class="status-dot"></div>
+                        <span id="statusText">Initializing...</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- System Info Panel -->
+            <section class="info-panel">
+                <h2>System Information</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>Platform:</strong>
+                        <span id="platformInfo">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Electron:</strong>
+                        <span id="electronVersion">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Node.js:</strong>
+                        <span id="nodeVersion">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Chrome:</strong>
+                        <span id="chromeVersion">Loading...</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Backend Status Panel -->
+            <section class="status-panel">
+                <h2>Backend Status</h2>
+                <div class="status-content">
+                    <div class="status-item">
+                        <button id="testBackendBtn" class="test-button">Test Backend Connection</button>
+                        <div id="backendResult" class="result-area"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Test Panel -->
+            <section class="ai-panel">
+                <h2>AI Integration Test</h2>
+                <div class="ai-test-content">
+                    <div class="input-group">
+                        <label for="queryInput">Test Query:</label>
+                        <input 
+                            type="text" 
+                            id="queryInput" 
+                            placeholder="Enter a test query about contracts..."
+                            value="Analyze this contract for potential risks and opportunities"
+                        >
+                        <button id="testAiBtn" class="test-button">Send to AI Backend</button>
+                    </div>
+                    <div id="aiResult" class="result-area"></div>
+                </div>
+            </section>
+
+            <!-- Logs Panel -->
+            <section class="logs-panel">
+                <h2>Application Logs</h2>
+                <div class="logs-content">
+                    <div id="logsArea" class="logs-area"></div>
+                    <button id="clearLogsBtn" class="clear-button">Clear Logs</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>Covenantrix v0.1.0 - Proof of Concept for Electron + Python Distribution</p>
+        </footer>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>
