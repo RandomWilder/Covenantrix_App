@@ -7,17 +7,17 @@
       "start": "cross-env NODE_ENV=development electron .",
       "dev": "cross-env NODE_ENV=development electron . --enable-logging",
       "build": "echo 'Building application...'",
-      "package:win": "electron-builder --win --x64",
-      "package:mac": "electron-builder --mac",
-      "package:linux": "electron-builder --linux",
-      "package:all": "electron-builder --win --mac --linux",
+      "package:win": "electron-builder --win --x64 --publish never",
+      "package:mac": "electron-builder --mac --publish never", 
+      "package:linux": "electron-builder --linux --publish never",
+      "package:all": "electron-builder --win --mac --publish never",
       "postinstall": "electron-builder install-app-deps",
       "clean": "rimraf dist/",
       "test-build": "npm run clean && npm run package:win"
     },
     "keywords": [
       "contract",
-      "ai",
+      "ai", 
       "legal",
       "document",
       "analysis"
@@ -46,7 +46,7 @@
           "filter": "**/*"
         },
         {
-          "from": "backend",
+          "from": "backend", 
           "to": "app-backend",
           "filter": "**/*"
         }
@@ -55,7 +55,7 @@
         "main.js",
         "preload.js",
         "renderer/*.html",
-        "renderer/*.js",
+        "renderer/*.js", 
         "renderer/*.css",
         "assets/**/*",
         "node_modules/**/*",
@@ -67,33 +67,21 @@
           "target": "nsis",
           "arch": ["x64"]
         },
-        "icon": "assets/icon.ico",
         "requestedExecutionLevel": "asInvoker"
       },
       "mac": {
         "target": "dmg",
-        "icon": "assets/icon.icns",
         "category": "public.app-category.business"
-      },
-      "linux": {
-        "target": "AppImage",
-        "icon": "assets/icon.png",
-        "category": "Office"
       },
       "nsis": {
         "oneClick": false,
         "allowToChangeInstallationDirectory": true,
         "createDesktopShortcut": true,
         "createStartMenuShortcut": true
-      },
-      "publish": {
-        "provider": "github",
-        "owner": "your-username",
-        "repo": "covenantrix"
       }
     },
     "repository": {
-      "type": "git",
+      "type": "git", 
       "url": "https://github.com/your-username/covenantrix.git"
     }
   }

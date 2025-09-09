@@ -28,10 +28,6 @@ jobs:
             platform: mac
             arch: x64
             python_exe: bin/python
-          - os: ubuntu-latest
-            platform: linux
-            arch: x64
-            python_exe: bin/python
             
     runs-on: ${{ matrix.os }}
     
@@ -64,15 +60,28 @@ jobs:
         curl -L -o python-embed.zip ${{ matrix.python_url }}
         unzip python-embed.zip -d dist/python-dist/
         
-        # Configure Python to find packages
-        echo "import sys; sys.path.append('.')" > dist/python-dist/sitecustomize.py
+        # Fix Python path file to enable site-packages
+        echo "import sys; import os; sys.path.append(os.path.join(os.path.dirname(__file__), 'Lib', 'site-packages'))" > dist/python-dist/sitecustomize.py
         
-        # Download and install pip
+        # Uncomment the import site line in python311._pth
+        sed -i 's/#import site/import site/' dist/python-dist/python311._pth
+        
+        # Create Lib and site-packages directories
+        mkdir -p dist/python-dist/Lib/site-packages
+        
+        # Download get-pip.py
         curl -L https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-        dist/python-dist/python.exe get-pip.py --no-warn-script-location
+        
+        # Install pip with proper paths
+        dist/python-dist/python.exe get-pip.py --target dist/python-dist/Lib/site-packages --no-warn-script-location
+        
+        # Test pip installation
+        echo "Testing pip installation..."
+        dist/python-dist/python.exe -c "import pip; print('Pip version:', pip.__version__)"
         
         # Install required packages
-        dist/python-dist/python.exe -m pip install --no-warn-script-location fastapi uvicorn pydantic
+        echo "Installing required packages..."
+        dist/python-dist/python.exe -m pip install --target dist/python-dist/Lib/site-packages --no-warn-script-location fastapi uvicorn pydantic
         
         echo "Windows Python distribution created successfully"
         
@@ -95,31 +104,22 @@ jobs:
         
         echo "macOS Python distribution created successfully"
         
-    - name: Create Python Distribution (Linux)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        echo "Creating Linux Python distribution..."
-        python3 -m venv dist/python-dist
-        source dist/python-dist/bin/activate
-        
-        # Upgrade pip
-        pip install --upgrade pip
-        
-        # Install required packages
-        pip install fastapi uvicorn pydantic
-        
-        echo "Linux Python distribution created successfully"
-        
     - name: Verify Python Distribution
       shell: bash
       run: |
         echo "Verifying Python distribution..."
         
         if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          echo "Python version:"
           dist/python-dist/python.exe --version
-          dist/python-dist/python.exe -c "import fastapi, uvicorn, pydantic; print('All packages imported successfully')"
+          echo "Testing package imports:"
+          dist/python-dist/python.exe -c "import fastapi; print('FastAPI version:', fastapi.__version__)"
+          dist/python-dist/python.exe -c "import uvicorn; print('Uvicorn imported successfully')"
+          dist/python-dist/python.exe -c "import pydantic; print('Pydantic version:', pydantic.__version__)"
         else
+          echo "Python version:"
           dist/python-dist/bin/python --version
+          echo "Testing package imports:"
           dist/python-dist/bin/python -c "import fastapi, uvicorn, pydantic; print('All packages imported successfully')"
         fi
         
@@ -161,10 +161,14 @@ jobs:
         
         echo "Backend test completed"
         
-    - name: Build Electron App
+    - name: Build Electron App (No Publish)
       run: |
         echo "Building Electron application for ${{ matrix.platform }}..."
+        # Temporarily disable publishing to avoid GitHub token issues
         npm run package:${{ matrix.platform }}
+      env:
+        # Don't set GH_TOKEN to avoid auto-publishing
+        ELECTRON_BUILDER_NO_PUBLISH: true
         
     - name: List build output
       shell: bash
@@ -180,7 +184,6 @@ jobs:
         path: |
           dist/packaged/*.exe
           dist/packaged/*.dmg
-          dist/packaged/*.AppImage
           dist/packaged/*.zip
           dist/packaged/*.tar.gz
         retention-days: 30
@@ -215,31 +218,7 @@ jobs:
         files: |
           artifacts/**/*.exe
           artifacts/**/*.dmg  
-          artifacts/**/*.AppImage
           artifacts/**/*.zip
           artifacts/**/*.tar.gz
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
-  # Optional: Test the built applications
-  test:
-    needs: build
-    runs-on: ${{ matrix.os }}
-    if: false  # Disable for now, enable when we have proper tests
-    strategy:
-      matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
-        
-    steps:
-    - name: Download artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: covenantrix-${{ matrix.os == 'windows-latest' && 'win' || matrix.os == 'macos-latest' && 'mac' || 'linux' }}-x64
-        path: test-app/
-        
-    - name: Test application startup
-      shell: bash
-      run: |
-        echo "Testing application startup..."
-        # Add startup tests here when ready
-        echo "Test placeholder - implement when tests are ready"
