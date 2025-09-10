@@ -104,7 +104,7 @@ jobs:
         pip install --upgrade pip
         
         # Install required packages
-        pip install fastapi uvicorn pydantic
+        pip install -r backend/requirements.txt
         
         # Make the distribution relocatable
         # Replace absolute paths with relative ones
