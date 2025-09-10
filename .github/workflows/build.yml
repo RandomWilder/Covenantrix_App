@@ -89,7 +89,7 @@ jobs:
         
         # Install required packages
         echo "Installing required packages..."
-        dist/python-dist/python.exe -m pip install --target dist/python-dist/Lib/site-packages --no-warn-script-location fastapi uvicorn pydantic
+        dist/python-dist/python.exe -m pip install --target dist/python-dist/Lib/site-packages --no-warn-script-location -r backend/requirements.txt
         
         echo "Windows Python distribution created successfully"
         
