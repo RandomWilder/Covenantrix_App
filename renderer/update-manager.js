@@ -1,26 +1,16 @@
-// Update Manager Frontend Component
+// Simple Update Manager - Manual Check Only
 class UpdateManager {
     constructor() {
-        this.currentStatus = 'unknown';
-        this.updateInfo = null;
+        this.isChecking = false;
     }
 
     initialize() {
-        this.setupUpdateListener();
         this.createUpdateUI();
         
-        // Check for updates on startup (after 5 seconds)
+        // Check for updates on startup after 10 seconds
         setTimeout(() => {
             this.checkForUpdates();
-        }, 5000);
-    }
-
-    setupUpdateListener() {
-        if (window.electronAPI.onUpdateStatus) {
-            window.electronAPI.onUpdateStatus((data) => {
-                this.handleUpdateStatus(data);
-            });
-        }
+        }, 10000);
     }
 
     createUpdateUI() {
@@ -33,19 +23,13 @@ class UpdateManager {
             <div class="update-content">
                 <div class="update-icon">📦</div>
                 <div class="update-message">
-                    <div class="update-title" id="updateTitle">Update Available</div>
-                    <div class="update-details" id="updateDetails">A new version is ready to install</div>
-                    <div class="update-progress" id="updateProgress" style="display: none;">
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="progressFill"></div>
-                        </div>
-                        <div class="progress-text" id="progressText">0%</div>
-                    </div>
+                    <div class="update-title" id="updateTitle">Checking for Updates</div>
+                    <div class="update-details" id="updateDetails">Please wait...</div>
                 </div>
                 <div class="update-actions">
-                    <button id="updateNowBtn" class="update-button primary">Update Now</button>
-                    <button id="updateLaterBtn" class="update-button secondary">Later</button>
+                    <button id="downloadUpdateBtn" class="update-button primary" style="display: none;">Download Update</button>
                     <button id="checkUpdatesBtn" class="update-button secondary">Check for Updates</button>
+                    <button id="closeNotificationBtn" class="update-button secondary">Close</button>
                 </div>
             </div>
         `;
@@ -57,19 +41,13 @@ class UpdateManager {
     }
 
     setupUpdateButtons() {
-        const updateNowBtn = document.getElementById('updateNowBtn');
-        const updateLaterBtn = document.getElementById('updateLaterBtn');
+        const downloadUpdateBtn = document.getElementById('downloadUpdateBtn');
         const checkUpdatesBtn = document.getElementById('checkUpdatesBtn');
+        const closeNotificationBtn = document.getElementById('closeNotificationBtn');
 
-        if (updateNowBtn) {
-            updateNowBtn.addEventListener('click', () => {
-                this.installUpdate();
-            });
-        }
-
-        if (updateLaterBtn) {
-            updateLaterBtn.addEventListener('click', () => {
-                this.hideNotification();
+        if (downloadUpdateBtn) {
+            downloadUpdateBtn.addEventListener('click', () => {
+                this.downloadUpdate();
             });
         }
 
@@ -78,54 +56,61 @@ class UpdateManager {
                 this.checkForUpdates();
             });
         }
+
+        if (closeNotificationBtn) {
+            closeNotificationBtn.addEventListener('click', () => {
+                this.hideNotification();
+            });
+        }
     }
 
-    handleUpdateStatus(data) {
-        console.log('Update status:', data);
-        this.currentStatus = data.status;
-        this.updateInfo = data;
-
-        switch (data.status) {
-            case 'checking':
-                this.showCheckingStatus();
-                break;
-            case 'available':
-                this.showUpdateAvailable(data);
-                break;
-            case 'not-available':
-                this.showUpToDate();
-                break;
-            case 'downloading':
-                this.showDownloadProgress(data.percent);
-                break;
-            case 'ready':
-                this.showUpdateReady(data);
-                break;
-            case 'error':
-                this.showUpdateError(data.error);
-                break;
+    async checkForUpdates() {
+        if (this.isChecking) return;
+        
+        this.isChecking = true;
+        this.showCheckingStatus();
+        
+        try {
+            const result = await window.electronAPI.checkForUpdates();
+            
+            if (result.success) {
+                if (result.updateAvailable) {
+                    this.showUpdateAvailable(result);
+                } else {
+                    this.showUpToDate();
+                }
+            } else {
+                this.showUpdateError(result.error);
+            }
+        } catch (error) {
+            this.showUpdateError(error.message);
+        } finally {
+            this.isChecking = false;
         }
     }
 
     showCheckingStatus() {
         this.updateTitle('Checking for Updates');
-        this.updateDetails('Looking for new versions...');
+        this.updateDetails('Connecting to GitHub...');
         this.showNotification();
-        this.showButtons(['checkUpdatesBtn']);
+        this.showButtons(['closeNotificationBtn']);
     }
 
     showUpdateAvailable(data) {
-        this.updateTitle(`Update Available: v${data.version}`);
-        this.updateDetails('A new version is available for download');
+        this.updateTitle(`Update Available: v${data.latestVersion}`);
+        this.updateDetails(`Current: v${data.currentVersion} → New: v${data.latestVersion}`);
         this.showNotification();
-        this.showButtons(['updateNowBtn', 'updateLaterBtn']);
+        this.showButtons(['downloadUpdateBtn', 'closeNotificationBtn']);
+        
+        // Store download URL for later use
+        this.downloadUrl = data.downloadUrl;
     }
 
     showUpToDate() {
         this.updateTitle('App is Up to Date');
         this.updateDetails('You are running the latest version');
         this.showNotification();
-        this.showButtons(['checkUpdatesBtn']);
+        this.showButtons(['checkUpdatesBtn', 'closeNotificationBtn']);
         
         // Auto-hide after 3 seconds
         setTimeout(() => {
@@ -133,32 +118,24 @@ class UpdateManager {
         }, 3000);
     }
 
-    showDownloadProgress(percent) {
-        this.updateTitle('Downloading Update');
-        this.updateDetails(`Downloading new version... ${percent}%`);
-        this.showProgress(percent);
-        this.showNotification();
-        this.showButtons([]); // Hide all buttons during download
-    }
-
-    showUpdateReady(data) {
-        this.updateTitle(`Update Ready: v${data.version}`);
-        this.updateDetails('Update downloaded and ready to install. App will restart.');
-        this.hideProgress();
-        this.showNotification();
-        this.showButtons(['updateNowBtn', 'updateLaterBtn']);
-    }
-
     showUpdateError(error) {
-        this.updateTitle('Update Error');
-        this.updateDetails(`Failed to check for updates: ${error}`);
+        this.updateTitle('Update Check Failed');
+        this.updateDetails(`Error: ${error}`);
         this.showNotification();
-        this.showButtons(['checkUpdatesBtn']);
+        this.showButtons(['checkUpdatesBtn', 'closeNotificationBtn']);
         
         // Auto-hide after 5 seconds
         setTimeout(() => {
             this.hideNotification();
         }, 5000);
+    }
+
+    downloadUpdate() {
+        if (this.downloadUrl) {
+            // Open GitHub release page in default browser
+            require('electron').shell.openExternal(this.downloadUrl);
+            this.hideNotification();
+        }
     }
 
     updateTitle(title) {
@@ -175,28 +152,13 @@ class UpdateManager {
         }
     }
 
-    showProgress(percent) {
-        const progressContainer = document.getElementById('updateProgress');
-        const progressFill = document.getElementById('progressFill');
-        const progressText = document.getElementById('progressText');
-        
-        if (progressContainer) progressContainer.style.display = 'block';
-        if (progressFill) progressFill.style.width = `${percent}%`;
-        if (progressText) progressText.textContent = `${percent}%`;
-    }
-
-    hideProgress() {
-        const progressContainer = document.getElementById('updateProgress');
-        if (progressContainer) progressContainer.style.display = 'none';
-    }
-
     showButtons(buttonIds) {
-        const allButtons = ['updateNowBtn', 'updateLaterBtn', 'checkUpdatesBtn'];
+        const allButtons = ['downloadUpdateBtn', 'checkUpdatesBtn', 'closeNotificationBtn'];
         
         allButtons.forEach(buttonId => {
             const button = document.getElementById(buttonId);
             if (button) {
-                button.style.display = buttonIds.includes(buttonId) ? 'block' : 'none';
+                button.style.display = buttonIds.includes(buttonId) ? 'inline-block' : 'none';
             }
         });
     }
@@ -212,37 +174,6 @@ class UpdateManager {
         const notification = document.getElementById('updateNotification');
         if (notification) {
             notification.classList.add('hidden');
-        }
-    }
-
-    async checkForUpdates() {
-        try {
-            const result = await window.electronAPI.checkForUpdates();
-            
-            if (!result.success) {
-                console.log('Update check failed:', result.error);
-                // Don't show error for dev mode
-                if (!result.error.includes('development mode')) {
-                    this.showUpdateError(result.error);
-                }
-            }
-        } catch (error) {
-            console.error('Failed to check for updates:', error);
-            this.showUpdateError(error.message);
-        }
-    }
-
-    async installUpdate() {
-        try {
-            const result = await window.electronAPI.installUpdate();
-            
-            if (!result.success) {
-                this.showUpdateError(result.error);
-            }
-            // If successful, app will restart automatically
-        } catch (error) {
-            console.error('Failed to install update:', error);
-            this.showUpdateError(error.message);
         }
     }
 }

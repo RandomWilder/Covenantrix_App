@@ -7,23 +7,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   testBackend: () => ipcRenderer.invoke('test-backend'),
   testLLM: (query) => ipcRenderer.invoke('test-llm', query),
   
-  // API Key management (NEW)
+  // API Key management
   validateAPIKey: (apiKey) => ipcRenderer.invoke('validate-api-key', apiKey),
   checkAPIKeyStatus: () => ipcRenderer.invoke('check-api-key-status'),
   removeAPIKey: () => ipcRenderer.invoke('remove-api-key'),
   
-  // Update management (NEW)
+  // SIMPLE Update checking (manual only)
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
-  installUpdate: () => ipcRenderer.invoke('install-update'),
-  
-  // Listen for update events (NEW)
-  onUpdateStatus: (callback) => {
-    ipcRenderer.on('update-status', (event, data) => callback(data));
-  },
-  
-  removeUpdateStatusListener: () => {
-    ipcRenderer.removeAllListeners('update-status');
-  },
   
   // Platform info
   platform: process.platform,

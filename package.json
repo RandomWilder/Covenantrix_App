@@ -1,6 +1,6 @@
 {
   "name": "covenantrix",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "Contract Intelligence Platform - Proof of Concept",
   "main": "main.js",
   "homepage": "https://github.com/RandomWilder/Covenantrix_App",
@@ -12,9 +12,6 @@
     "package:mac": "electron-builder --mac --publish never", 
     "package:linux": "electron-builder --linux --publish never",
     "package:all": "electron-builder --win --mac --publish never",
-    "release:win": "electron-builder --win --x64 --publish always",
-    "release:mac": "electron-builder --mac --publish always",
-    "release:all": "electron-builder --win --mac --publish always",
     "postinstall": "electron-builder install-app-deps",
     "clean": "rimraf dist/",
     "test-build": "npm run clean && npm run package:win"
@@ -47,13 +44,6 @@
     "directories": {
       "output": "dist/packaged"
     },
-    "publish": {
-      "provider": "github",
-      "owner": "RandomWilder",
-      "repo": "Covenantrix_App",
-      "private": false,
-      "publishAutoUpdate": true
-    },
     "extraResources": [
       {
         "from": "dist/python-dist",
@@ -82,15 +72,11 @@
         "target": "nsis",
         "arch": ["x64"]
       },
-      "requestedExecutionLevel": "asInvoker",
-      "publisherName": "RandomWilder",
-      "verifyUpdateCodeSignature": false
+      "requestedExecutionLevel": "asInvoker"
     },
     "mac": {
       "target": "dmg",
-      "category": "public.app-category.business",
-      "hardenedRuntime": false,
-      "gatekeeperAssess": false
+      "category": "public.app-category.business"
     },
     "linux": {
       "target": "AppImage",
@@ -100,13 +86,7 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "installerIcon": "assets/icon.ico",
-      "uninstallerIcon": "assets/icon.ico"
-    },
-    "dmg": {
-      "icon": "assets/icon.icns",
-      "title": "Covenantrix Installer"
+      "createStartMenuShortcut": true
     }
   },
   "repository": {
