@@ -12,6 +12,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   checkAPIKeyStatus: () => ipcRenderer.invoke('check-api-key-status'),
   removeAPIKey: () => ipcRenderer.invoke('remove-api-key'),
   
+  // Document processing (NEW - minimal)
+  uploadDocument: (fileBuffer, fileName) => ipcRenderer.invoke('upload-document', fileBuffer, fileName),
+  
   // SIMPLE Update checking (manual only)
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
   

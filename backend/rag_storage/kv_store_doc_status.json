@@ -1,0 +1,152 @@
+{
+  "doc-29a66b2298f9da5d53cf683c7fcb5524": {
+    "status": "failed",
+    "error_msg": "[LLM func] openai_complete_if_cache() missing 1 required positional argument: 'prompt'",
+    "content_summary": "Contract 3: Comprehensive Property \nManagement Agreement \nPROPERTY MANAGEMENT AGREEMENT \nPROPERTY OWNER: Vista Ridge Properties, LLC​\n A California Limited Liability Company​\n Address: 15847 Mountain View Drive, Los Angeles, CA 90210​\n Phone: (323) 5...",
+    "content_length": 56090,
+    "created_at": "2025-09-10T15:12:12.649281+00:00",
+    "updated_at": "2025-09-10T15:38:05.244716+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20250910_181212_ecd8a54f",
+    "metadata": {
+      "processing_start_time": 1757518681,
+      "processing_end_time": 1757518685
+    },
+    "chunks_list": []
+  },
+  "doc-554f304ca9e2b3f710aff7ef854c1c57": {
+    "status": "failed",
+    "error_msg": "[LLM func] openai_complete_if_cache() missing 1 required positional argument: 'prompt'",
+    "content_summary": "Contract 2: Comprehensive Residential \nLease Agreement \nRESIDENTIAL LEASE AGREEMENT \nLANDLORD: W. Random Industries Property Management, LLC​\n A California Limited Liability Company​\n Address: 2847 Professional Drive, Suite 150, Madera, CA 93637​\n Ph...",
+    "content_length": 47969,
+    "created_at": "2025-09-10T15:27:32.063237+00:00",
+    "updated_at": "2025-09-10T15:38:04.282860+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20250910_182732_093e4692",
+    "metadata": {
+      "processing_start_time": 1757518681,
+      "processing_end_time": 1757518684
+    },
+    "chunks_list": []
+  },
+  "doc-bfbdc9c954a27164310a1b0904a139ab": {
+    "status": "failed",
+    "error_msg": "[LLM func] openai_complete_if_cache() missing 1 required positional argument: 'prompt'",
+    "content_summary": "Document: Contract 1_ Commercial Lease Agreement (Retail Space).pdf (Chunk 1/8)\n\nContract 1: Commercial Lease Agreement (Retail Space) \nCOMMERCIAL LEASE AGREEMENT \nPARTIES:​\n Landlord: W. Random Industries, LLC, a California Limited Liability Company...",
+    "content_length": 1762,
+    "created_at": "2025-09-10T15:37:11.110272+00:00",
+    "updated_at": "2025-09-10T15:38:06.638848+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20250910_183711_5f06f210",
+    "metadata": {
+      "processing_start_time": 1757518684,
+      "processing_end_time": 1757518686
+    },
+    "chunks_list": []
+  },
+  "doc-fd53b23d72017127272317c8dbaa381b": {
+    "status": "failed",
+    "error_msg": "[LLM func] openai_complete_if_cache() missing 1 required positional argument: 'prompt'",
+    "content_summary": "Document: Contract 1_ Commercial Lease Agreement (Retail Space).pdf (Chunk 2/8)\n\nARTICLE 2: RENT AND ADDITIONAL CHARGES\n\n2.1 Base Rent Payment: Base Rent shall be paid monthly in advance on the first day of each \ncalendar month. If the Lease Term com...",
+    "content_length": 2442,
+    "created_at": "2025-09-10T15:37:15.310889+00:00",
+    "updated_at": "2025-09-10T15:38:07.798041+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20250910_183715_8c6877b4",
+    "metadata": {
+      "processing_start_time": 1757518685,
+      "processing_end_time": 1757518687
+    },
+    "chunks_list": []
+  },
+  "doc-438c689c1d059fd09b93fc71365b3744": {
+    "status": "failed",
+    "error_msg": "[LLM func] openai_complete_if_cache() missing 1 required positional argument: 'prompt'",
+    "content_summary": "Document: Contract 1_ Commercial Lease Agreement (Retail Space).pdf (Chunk 3/8)\n\n3.2 Prohibited Uses: Tenant shall not use the Premises for: \n●​ Sale of alcoholic beverages, tobacco products, or firearms\n\n●​ Any illegal activities or purposes \n●​ Any...",
+    "content_length": 2457,
+    "created_at": "2025-09-10T15:37:20.082537+00:00",
+    "updated_at": "2025-09-10T15:38:09.464267+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20250910_183720_4e5162da",
+    "metadata": {
+      "processing_start_time": 1757518686,
+      "processing_end_time": 1757518689
+    },
+    "chunks_list": []
+  },
+  "doc-7c7bc81015387803e757eb63ec5d9430": {
+    "status": "failed",
+    "error_msg": "[LLM func] openai_complete_if_cache() missing 1 required positional argument: 'prompt'",
+    "content_summary": "Document: Contract 1_ Commercial Lease Agreement (Retail Space).pdf (Chunk 4/8)\n\nOVEMENTS \n5.1 Tenant Improvements: Tenant may make alterations and improvements to the Premises \nwith Landlord's prior written consent, which shall not be unreasonably w...",
+    "content_length": 2251,
+    "created_at": "2025-09-10T15:37:24.816408+00:00",
+    "updated_at": "2025-09-10T15:38:11.553397+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20250910_183724_04345f9e",
+    "metadata": {
+      "processing_start_time": 1757518687,
+      "processing_end_time": 1757518691
+    },
+    "chunks_list": []
+  },
+  "doc-4a35f0f825772bf0b3ff416343d92d4a": {
+    "status": "failed",
+    "error_msg": "[LLM func] openai_complete_if_cache() missing 1 required positional argument: 'prompt'",
+    "content_summary": "Document: Contract 1_ Commercial Lease Agreement (Retail Space).pdf (Chunk 5/8)\n\ntatements of proposed assignee \n●​ Business plan and operational details \n●​ Personal guaranty if required by Landlord \n●​ Payment of $2,500 assignment fee \n●​ Reimburse...",
+    "content_length": 2356,
+    "created_at": "2025-09-10T15:37:30.375175+00:00",
+    "updated_at": "2025-09-10T15:38:13.091414+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20250910_183730_550e5ba4",
+    "metadata": {
+      "processing_start_time": 1757518689,
+      "processing_end_time": 1757518693
+    },
+    "chunks_list": []
+  },
+  "doc-a653d730eb63062aba3af2795b0a4d0f": {
+    "status": "failed",
+    "error_msg": "[LLM func] openai_complete_if_cache() missing 1 required positional argument: 'prompt'",
+    "content_summary": "Document: Contract 1_ Commercial Lease Agreement (Retail Space).pdf (Chunk 6/8)\n\n's use or occupancy of the Premises \n●​ Acts or omissions of Tenant, its employees, agents, or invitees \n●​ Breach of this Lease by Tenant \n●​ Any accident, injury, or d...",
+    "content_length": 2331,
+    "created_at": "2025-09-10T15:37:38.528187+00:00",
+    "updated_at": "2025-09-10T15:38:13.890816+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20250910_183738_6fd6bf24",
+    "metadata": {
+      "processing_start_time": 1757518691,
+      "processing_end_time": 1757518693
+    },
+    "chunks_list": []
+  },
+  "doc-ff5eeebca1250dd1126aae59074600ae": {
+    "status": "failed",
+    "error_msg": "[LLM func] openai_complete_if_cache() missing 1 required positional argument: 'prompt'",
+    "content_summary": "Document: Contract 1_ Commercial Lease Agreement (Retail Space).pdf (Chunk 7/8)\n\n(E) Multiple Defaults: Three or more defaults in any 12-month period, regardless of cure.. 9.2 Landlord's Remedies: Upon default, Landlord may exercise any or all of the...",
+    "content_length": 2603,
+    "created_at": "2025-09-10T15:37:49.129041+00:00",
+    "updated_at": "2025-09-10T15:38:15.548041+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20250910_183749_5720b39b",
+    "metadata": {
+      "processing_start_time": 1757518693,
+      "processing_end_time": 1757518695
+    },
+    "chunks_list": []
+  },
+  "doc-5ddd3548851c8209b790c41ce3fc4e1d": {
+    "status": "failed",
+    "error_msg": "[LLM func] openai_complete_if_cache() missing 1 required positional argument: 'prompt'",
+    "content_summary": "Document: Contract 1_ Commercial Lease Agreement (Retail Space).pdf (Chunk 8/8)\n\n(C) Tenant's Property: Tenant shall be solely responsible for repair or replacement of tenant \nimprovements, personal property, and inventory.. ARTICLE 11: ENVIRONMENTAL...",
+    "content_length": 3684,
+    "created_at": "2025-09-10T15:38:01.483859+00:00",
+    "updated_at": "2025-09-10T15:38:15.590035+00:00",
+    "file_path": "unknown_source",
+    "track_id": "insert_20250910_183801_a6d5fb8c",
+    "metadata": {
+      "processing_start_time": 1757518693,
+      "processing_end_time": 1757518695
+    },
+    "chunks_list": []
+  }
+}

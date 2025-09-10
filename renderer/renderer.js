@@ -5,6 +5,8 @@ console.log('Renderer process loaded');
 let statusIndicator, statusText, statusDot;
 let testBackendBtn, testAiBtn, clearLogsBtn;
 let backendResult, aiResult, logsArea, queryInput;
+// NEW: Document processing elements (minimal)
+let uploadDocBtn, documentInput, documentResult;
 
 // Application state
 let isBackendConnected = false;
@@ -30,6 +32,10 @@ function initializeElements() {
     testBackendBtn = document.getElementById('testBackendBtn');
     testAiBtn = document.getElementById('testAiBtn');
     clearLogsBtn = document.getElementById('clearLogsBtn');
+    // NEW: Document upload elements (minimal)
+    uploadDocBtn = document.getElementById('uploadDocBtn');
+    documentInput = document.getElementById('documentInput');
+    documentResult = document.getElementById('documentResult');
     
     // Result areas
     backendResult = document.getElementById('backendResult');
@@ -80,6 +86,11 @@ function setupEventListeners() {
             event.preventDefault();
             testAIConnection();
         }
+    });
+    
+    // NEW: Document upload event listener (minimal)
+    uploadDocBtn.addEventListener('click', async () => {
+        await uploadDocument();
     });
     
     addLog('Event listeners setup complete', 'info');
@@ -282,6 +293,45 @@ function clearLogs() {
     }
     addLog('Logs cleared', 'info');
 }
+
+// NEW: Document processing functions
+async function uploadDocument() {
+    const file = documentInput.files[0];
+    
+    if (!file) {
+        displayResult(documentResult, 'Please select a file to upload', 'error');
+        addLog('Upload failed: no file selected', 'warning');
+        return;
+    }
+    
+    setButtonLoading(uploadDocBtn, true);
+    setResultAreaLoading(documentResult, true);
+    addLog(`Uploading document: ${file.name}`, 'info');
+    
+    try {
+        // Read file as buffer
+        const fileBuffer = await file.arrayBuffer();
+        
+        // Send to backend via IPC
+        const result = await window.electronAPI.uploadDocument(fileBuffer, file.name);
+        
+        if (result.success) {
+            const formattedData = formatJSON(result.data);
+            displayResult(documentResult, formattedData, 'success');
+            addLog(`✅ Document uploaded successfully: ${file.name}`, 'success');
+        } else {
+            displayResult(documentResult, `Error: ${result.error}`, 'error');
+            addLog(`❌ Document upload failed: ${result.error}`, 'error');
+        }
+    } catch (error) {
+        displayResult(documentResult, `Unexpected error: ${error.message}`, 'error');
+        addLog(`❌ Upload error: ${error.message}`, 'error');
+    } finally {
+        setButtonLoading(uploadDocBtn, false);
+        setResultAreaLoading(documentResult, false);
+    }
+}
+
 
 // Error handling
 window.addEventListener('error', (event) => {

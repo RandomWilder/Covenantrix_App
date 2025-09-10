@@ -1,6 +1,28 @@
+# Core FastAPI and backend dependencies
 fastapi>=0.104.1
 uvicorn[standard]>=0.24.0
 pydantic>=2.5.0
-openai>=1.3.0
 python-dotenv>=1.0.0
 cryptography>=41.0.0
+python-multipart
+aiofiles
+
+# AI and RAG dependencies
+openai>=1.3.0
+lightrag-hku
+
+# Document processing dependencies
+pymupdf>=1.23.0                # PDF processing (PyMuPDF)
+python-docx>=0.8.11           # DOCX/DOC support
+openpyxl>=3.1.2               # Excel support (XLSX/XLS)
+Pillow>=10.0.0                # Image processing and handling
+
+# Google Vision API for OCR (lightweight cloud-based OCR)
+google-cloud-vision>=3.4.0    # Google Vision API client (~5MB vs 200MB+ for Tesseract)
+
+# Note: OCR Features
+# - Google Vision API key required for OCR functionality
+# - Supports BYOK (Bring Your Own Key) model
+# - Cost: ~$0.0015 per page (first 1,000/month free)
+# - Superior accuracy compared to offline OCR solutions
+# - Zero installer bloat compared to Tesseract bundling

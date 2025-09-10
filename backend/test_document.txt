@@ -1,0 +1,22 @@
+CONTRACT ANALYSIS TEST DOCUMENT
+
+This is a sample contract between Acme Corp and Beta LLC for software development services.
+
+KEY TERMS:
+- Contract Value: $50,000
+- Duration: 6 months (January 1, 2024 to June 30, 2024)
+- Payment Schedule: Monthly payments of $8,333
+- Late Payment: 1.5% monthly penalty
+- Termination: Either party may terminate with 30 days notice
+- Intellectual Property: All work product belongs to Acme Corp
+- Confidentiality: 5-year non-disclosure period
+
+RISKS IDENTIFIED:
+- No force majeure clause
+- Missing dispute resolution mechanism  
+- Unclear scope change procedures
+
+OPPORTUNITIES:
+- Potential for contract extension
+- Additional services not explicitly excluded
+- Performance bonuses could be negotiated

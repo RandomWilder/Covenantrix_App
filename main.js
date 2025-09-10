@@ -369,6 +369,54 @@ ipcMain.handle('remove-api-key', async () => {
   }
 });
 
+// NEW: Document processing handlers
+ipcMain.handle('upload-document', async (event, fileBuffer, fileName) => {
+  try {
+    // Convert ArrayBuffer to Buffer for Node.js
+    const nodeBuffer = Buffer.from(fileBuffer);
+    
+    // Create proper multipart boundary
+    const boundary = `----formdata-electron-${Date.now()}`;
+    const CRLF = '\r\n';
+    
+    // Build multipart form-data with proper binary handling
+    const header = [
+      `--${boundary}`,
+      `Content-Disposition: form-data; name="file"; filename="${fileName}"`,
+      'Content-Type: application/octet-stream',
+      '',
+      ''
+    ].join(CRLF);
+    
+    const footer = `${CRLF}--${boundary}--${CRLF}`;
+    
+    // Combine header + file buffer + footer
+    const headerBuffer = Buffer.from(header, 'utf8');
+    const footerBuffer = Buffer.from(footer, 'utf8');
+    const formDataBuffer = Buffer.concat([headerBuffer, nodeBuffer, footerBuffer]);
+    
+    const response = await fetch(`http://${PYTHON_HOST}:${PYTHON_PORT}/documents/upload`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': `multipart/form-data; boundary=${boundary}`,
+        'Content-Length': formDataBuffer.length
+      },
+      body: formDataBuffer
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      return { success: true, data };
+    } else {
+      return { success: false, error: data.detail || 'Upload failed' };
+    }
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+
 // SIMPLE Manual Update Check (GitHub API only)
 ipcMain.handle('check-for-updates', async () => {
   if (isDev) {

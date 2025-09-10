@@ -1,6 +1,6 @@
 {
   "name": "covenantrix",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "description": "Contract Intelligence Platform - Proof of Concept",
   "main": "main.js",
   "homepage": "https://github.com/RandomWilder/Covenantrix_App",
@@ -9,7 +9,7 @@
     "dev": "cross-env NODE_ENV=development electron . --enable-logging",
     "build": "echo 'Building application...'",
     "package:win": "electron-builder --win --x64 --publish never",
-    "package:mac": "electron-builder --mac --publish never", 
+    "package:mac": "electron-builder --mac --publish never",
     "package:linux": "electron-builder --linux --publish never",
     "package:all": "electron-builder --win --mac --publish never",
     "postinstall": "electron-builder install-app-deps",
@@ -18,7 +18,7 @@
   },
   "keywords": [
     "contract",
-    "ai", 
+    "ai",
     "legal",
     "document",
     "analysis",
@@ -30,12 +30,13 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "electron": "^27.0.0",
     "electron-builder": "^24.6.4",
-    "cross-env": "^7.0.3",
     "rimraf": "^5.0.5"
   },
   "dependencies": {
+    "form-data": "^4.0.4",
     "node-fetch": "^3.3.2"
   },
   "build": {
@@ -51,7 +52,7 @@
         "filter": "**/*"
       },
       {
-        "from": "backend", 
+        "from": "backend",
         "to": "app-backend",
         "filter": "**/*"
       }
@@ -60,7 +61,7 @@
       "main.js",
       "preload.js",
       "renderer/*.html",
-      "renderer/*.js", 
+      "renderer/*.js",
       "renderer/*.css",
       "assets/**/*",
       "node_modules/**/*",
@@ -70,7 +71,9 @@
     "win": {
       "target": {
         "target": "nsis",
-        "arch": ["x64"]
+        "arch": [
+          "x64"
+        ]
       },
       "requestedExecutionLevel": "asInvoker"
     },
@@ -90,7 +93,7 @@
     }
   },
   "repository": {
-    "type": "git", 
+    "type": "git",
     "url": "git+https://github.com/RandomWilder/Covenantrix_App.git"
   },
   "bugs": {
