@@ -132,8 +132,8 @@ class UpdateManager {
 
     downloadUpdate() {
         if (this.downloadUrl) {
-            // Open GitHub release page in default browser
-            require('electron').shell.openExternal(this.downloadUrl);
+            // FIXED: Use window.open instead of require('electron')
+            window.open(this.downloadUrl, '_blank');
             this.hideNotification();
         }
     }
