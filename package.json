@@ -1,6 +1,6 @@
 {
   "name": "covenantrix",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "Contract Intelligence Platform - Proof of Concept",
   "main": "main.js",
   "homepage": "https://github.com/RandomWilder/Covenantrix_App",
@@ -54,7 +54,7 @@
       {
         "from": "backend",
         "to": "app-backend",
-        "filter": ["**/*", "!rag_storage/**/*"]
+        "filter": ["**/*", "!**/rag_storage/**"]
       }
     ],
     "files": [
