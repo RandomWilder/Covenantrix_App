@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Covenantrix Backend",
     description="Contract Intelligence Platform Backend",
-    version="0.2.0"
+    version="0.3.1"
 )
 
 # Add CORS middleware
@@ -274,7 +274,7 @@ async def root():
     
     return {
         "message": "Covenantrix Backend API",
-        "version": "0.2.0",
+        "version": "0.3.1",
         "status": "running",
         "uptime_seconds": uptime.total_seconds(),
         "endpoints": {
