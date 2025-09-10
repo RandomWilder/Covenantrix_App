@@ -21,15 +21,22 @@ const GITHUB_REPO = 'Covenantrix_App';
 const UPDATE_CHECK_INTERVAL = 60000; // Check every minute (for testing)
 // const UPDATE_CHECK_INTERVAL = 3600000; // Check every hour (for production)
 
-// Auto-updater configuration
+// FIXED: Auto-updater configuration
 if (!isDev) {
   // Only enable auto-updater in production
-  autoUpdater.setFeedURL({
-    provider: 'github',
-    owner: GITHUB_OWNER,
-    repo: GITHUB_REPO,
-    private: false
-  });
+  // Use the correct URL format for GitHub releases
+  const feedURL = `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest/download/`;
+  
+  try {
+    autoUpdater.setFeedURL({
+      url: feedURL,
+      serverType: 'json'
+    });
+    console.log('✅ Auto-updater configured with feed URL:', feedURL);
+  } catch (error) {
+    console.error('❌ Failed to configure auto-updater:', error);
+    // Don't break the app if auto-updater fails to configure
+  }
 
   // Auto-updater event handlers
   autoUpdater.on('checking-for-update', () => {
@@ -38,11 +45,11 @@ if (!isDev) {
   });
 
   autoUpdater.on('update-available', (info) => {
-    console.log('📦 Update available:', info.version);
+    console.log('📦 Update available:', info);
     sendToRenderer('update-status', { 
       status: 'available', 
-      version: info.version,
-      releaseNotes: info.releaseNotes 
+      version: info.version || 'newer version',
+      releaseNotes: info.releaseNotes || 'No release notes available'
     });
   });
 
@@ -71,7 +78,7 @@ if (!isDev) {
     console.log('✅ Update downloaded, ready to install');
     sendToRenderer('update-status', { 
       status: 'ready', 
-      version: info.version 
+      version: info.version || 'newer version'
     });
     
     // Show dialog to user
@@ -88,12 +95,13 @@ function sendToRenderer(channel, data) {
 
 // Show update ready dialog
 function showUpdateReadyDialog(info) {
+  const version = info.version || 'newer version';
   const response = dialog.showMessageBoxSync(mainWindow, {
     type: 'info',
     buttons: ['Restart Now', 'Later'],
     defaultId: 0,
     title: 'Update Ready',
-    message: `Version ${info.version} has been downloaded and is ready to install.`,
+    message: `Version ${version} has been downloaded and is ready to install.`,
     detail: 'The application will restart to apply the update.'
   });
 
@@ -103,19 +111,27 @@ function showUpdateReadyDialog(info) {
   }
 }
 
-// Start checking for updates after app is ready
+// MODIFIED: Start checking for updates after app is ready
 function startUpdateChecker() {
   if (!isDev) {
     console.log('🚀 Starting update checker...');
     
-    // Check immediately on startup
+    // Check immediately on startup (after longer delay)
     setTimeout(() => {
-      autoUpdater.checkForUpdatesAndNotify();
-    }, 10000); // Wait 10 seconds after startup
+      try {
+        autoUpdater.checkForUpdatesAndNotify();
+      } catch (error) {
+        console.error('❌ Failed to check for updates:', error);
+      }
+    }, 15000); // Wait 15 seconds after startup
     
     // Then check periodically
     setInterval(() => {
-      autoUpdater.checkForUpdatesAndNotify();
+      try {
+        autoUpdater.checkForUpdatesAndNotify();
+      } catch (error) {
+        console.error('❌ Failed to check for updates:', error);
+      }
     }, UPDATE_CHECK_INTERVAL);
   }
 }
@@ -374,7 +390,7 @@ app.whenReady().then(async () => {
     // Then create window
     await createWindow();
     
-    // Start update checker
+    // Start update checker (with error handling)
     startUpdateChecker();
     
     console.log('Application startup complete!');
@@ -477,7 +493,7 @@ ipcMain.handle('remove-api-key', async () => {
   }
 });
 
-// NEW Update management handlers
+// MODIFIED: Update management handlers with better error handling
 ipcMain.handle('check-for-updates', async () => {
   if (isDev) {
     return { success: false, error: 'Updates not available in development mode' };
@@ -487,6 +503,7 @@ ipcMain.handle('check-for-updates', async () => {
     await autoUpdater.checkForUpdatesAndNotify();
     return { success: true, message: 'Checking for updates...' };
   } catch (error) {
+    console.error('Manual update check failed:', error);
     return { success: false, error: error.message };
   }
 });
@@ -500,6 +517,7 @@ ipcMain.handle('install-update', async () => {
     autoUpdater.quitAndInstall();
     return { success: true };
   } catch (error) {
+    console.error('Update installation failed:', error);
     return { success: false, error: error.message };
   }
 });
