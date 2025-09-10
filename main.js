@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, autoUpdater } = require('electron');
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
@@ -14,6 +14,111 @@ let mainWindow = null;
 const PYTHON_PORT = 8000;
 const PYTHON_HOST = '127.0.0.1';
 const MAX_STARTUP_TIME = 30000; // 30 seconds max startup time
+
+// Auto-updater configuration
+const GITHUB_OWNER = 'RandomWilder';
+const GITHUB_REPO = 'Covenantrix_App';
+const UPDATE_CHECK_INTERVAL = 60000; // Check every minute (for testing)
+// const UPDATE_CHECK_INTERVAL = 3600000; // Check every hour (for production)
+
+// Auto-updater configuration
+if (!isDev) {
+  // Only enable auto-updater in production
+  autoUpdater.setFeedURL({
+    provider: 'github',
+    owner: GITHUB_OWNER,
+    repo: GITHUB_REPO,
+    private: false
+  });
+
+  // Auto-updater event handlers
+  autoUpdater.on('checking-for-update', () => {
+    console.log('🔍 Checking for updates...');
+    sendToRenderer('update-status', { status: 'checking' });
+  });
+
+  autoUpdater.on('update-available', (info) => {
+    console.log('📦 Update available:', info.version);
+    sendToRenderer('update-status', { 
+      status: 'available', 
+      version: info.version,
+      releaseNotes: info.releaseNotes 
+    });
+  });
+
+  autoUpdater.on('update-not-available', (info) => {
+    console.log('✅ App is up to date');
+    sendToRenderer('update-status', { status: 'not-available' });
+  });
+
+  autoUpdater.on('error', (err) => {
+    console.error('❌ Auto-updater error:', err);
+    sendToRenderer('update-status', { 
+      status: 'error', 
+      error: err.message 
+    });
+  });
+
+  autoUpdater.on('download-progress', (progressObj) => {
+    console.log(`📥 Download progress: ${Math.round(progressObj.percent)}%`);
+    sendToRenderer('update-status', { 
+      status: 'downloading', 
+      percent: Math.round(progressObj.percent) 
+    });
+  });
+
+  autoUpdater.on('update-downloaded', (info) => {
+    console.log('✅ Update downloaded, ready to install');
+    sendToRenderer('update-status', { 
+      status: 'ready', 
+      version: info.version 
+    });
+    
+    // Show dialog to user
+    showUpdateReadyDialog(info);
+  });
+}
+
+// Helper function to send messages to renderer
+function sendToRenderer(channel, data) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send(channel, data);
+  }
+}
+
+// Show update ready dialog
+function showUpdateReadyDialog(info) {
+  const response = dialog.showMessageBoxSync(mainWindow, {
+    type: 'info',
+    buttons: ['Restart Now', 'Later'],
+    defaultId: 0,
+    title: 'Update Ready',
+    message: `Version ${info.version} has been downloaded and is ready to install.`,
+    detail: 'The application will restart to apply the update.'
+  });
+
+  if (response === 0) {
+    // User clicked "Restart Now"
+    autoUpdater.quitAndInstall();
+  }
+}
+
+// Start checking for updates after app is ready
+function startUpdateChecker() {
+  if (!isDev) {
+    console.log('🚀 Starting update checker...');
+    
+    // Check immediately on startup
+    setTimeout(() => {
+      autoUpdater.checkForUpdatesAndNotify();
+    }, 10000); // Wait 10 seconds after startup
+    
+    // Then check periodically
+    setInterval(() => {
+      autoUpdater.checkForUpdatesAndNotify();
+    }, UPDATE_CHECK_INTERVAL);
+  }
+}
 
 class PythonBackend {
   constructor() {
@@ -269,6 +374,9 @@ app.whenReady().then(async () => {
     // Then create window
     await createWindow();
     
+    // Start update checker
+    startUpdateChecker();
+    
     console.log('Application startup complete!');
   } catch (error) {
     console.error('Failed to start application:', error);
@@ -329,7 +437,7 @@ ipcMain.handle('test-llm', async (event, query) => {
   }
 });
 
-// NEW API Key management handlers
+// API Key management handlers
 ipcMain.handle('validate-api-key', async (event, apiKey) => {
   try {
     const response = await fetch(`http://${PYTHON_HOST}:${PYTHON_PORT}/api-key/validate`, {
@@ -369,6 +477,33 @@ ipcMain.handle('remove-api-key', async () => {
   }
 });
 
+// NEW Update management handlers
+ipcMain.handle('check-for-updates', async () => {
+  if (isDev) {
+    return { success: false, error: 'Updates not available in development mode' };
+  }
+  
+  try {
+    await autoUpdater.checkForUpdatesAndNotify();
+    return { success: true, message: 'Checking for updates...' };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('install-update', async () => {
+  if (isDev) {
+    return { success: false, error: 'Updates not available in development mode' };
+  }
+  
+  try {
+    autoUpdater.quitAndInstall();
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
 // Add fetch polyfill for older Node versions
 if (!global.fetch) {
   global.fetch = require('node-fetch');
@@ -378,3 +513,4 @@ console.log('Electron main process loaded');
 console.log('Development mode:', isDev);
 console.log('Platform:', process.platform);
 console.log('Resources path:', process.resourcesPath);
+console.log('GitHub Repository:', `${GITHUB_OWNER}/${GITHUB_REPO}`);
