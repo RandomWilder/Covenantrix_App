@@ -180,14 +180,14 @@ jobs:
       shell: bash
       run: |
         echo "Build output contents:"
-        ls -la dist/packaged/ 2>/dev/null || echo "No packaged directory found"
-        find dist/packaged/ -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" \) 2>/dev/null | head -10 || echo "No build artifacts found"
+        ls -la dist/release/ 2>/dev/null || echo "No release directory found"
+        find dist/release/ -type f \( -name "*.exe" -o -name "*.dmg" -o -name "*.AppImage" \) 2>/dev/null | head -10 || echo "No build artifacts found"
         
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: covenantrix-${{ matrix.platform }}-${{ matrix.arch }}
-        path: dist/packaged/${{ matrix.artifact_pattern }}
+        path: dist/release/${{ matrix.artifact_pattern }}
         retention-days: 30
         if-no-files-found: error
         
