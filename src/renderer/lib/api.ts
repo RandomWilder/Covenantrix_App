@@ -8,6 +8,14 @@ declare global {
         checkAPIKeyStatus: () => Promise<{ success: boolean; data?: any; error?: string }>;
         removeAPIKey: () => Promise<{ success: boolean; data?: any; error?: string }>;
         uploadDocument: (fileBuffer: ArrayBuffer, fileName: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+        
+        // Auto-updater methods (matching preload.js)
+        checkForUpdates: () => Promise<{ success: boolean; data?: any; error?: string }>;
+        downloadUpdate: () => Promise<{ success: boolean; data?: any; error?: string }>;
+        installUpdate: () => Promise<{ success: boolean; data?: any; error?: string }>;
+        onUpdaterMessage: (callback: (data: any) => void) => void;
+        removeUpdaterListener: () => void;
+        
         platform: string;
         versions: {
           node: string;

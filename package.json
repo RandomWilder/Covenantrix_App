@@ -1,6 +1,6 @@
 {
   "name": "covenantrix",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Contract Intelligence Platform - Proof of Concept",
   "main": "main.js",
   "homepage": "https://github.com/RandomWilder/Covenantrix_App",
@@ -10,17 +10,28 @@
     "dev:react": "vite",
     "build:react": "tsc && vite build --outDir ../../dist-react",
     "dev:electron": "cross-env NODE_ENV=development electron .",
-    "build": "echo 'Building application...'",
+    "build": "npm run build:react",
+    "prebuild": "taskkill /f /im \"Covenantrix.exe\" 2>nul || echo \"No Covenantrix processes found\"",
+    "clean-build": "npm run clean && npm run build && echo \"Clean build completed successfully\"",
+    "prepackage:win": "npm run clean-build",
     "package:win": "electron-builder --win --x64 --publish never",
+    "prepackage:mac": "npm run clean-build",
     "package:mac": "electron-builder --mac --publish never",
+    "prepackage:linux": "npm run clean-build",
     "package:linux": "electron-builder --linux --publish never",
+    "prepackage:all": "npm run clean-build",
     "package:all": "electron-builder --win --mac --publish never",
+    "prerelease:win": "npm run clean-build",
     "release:win": "electron-builder --win --x64 --publish always",
+    "prerelease:mac": "npm run clean-build",
     "release:mac": "electron-builder --mac --publish always",
+    "prerelease:linux": "npm run clean-build",
     "release:linux": "electron-builder --linux --publish always",
+    "prerelease:all": "npm run clean-build",
     "release:all": "electron-builder --win --mac --linux --publish always",
     "postinstall": "electron-builder install-app-deps",
-    "clean": "rimraf dist/",
+    "clean": "taskkill /f /im \"Covenantrix.exe\" 2>nul || echo \"No processes to stop\" && takeown /f dist /r /d y >nul 2>&1 && icacls dist /grant administrators:F /t >nul 2>&1 && rimraf dist/ || echo \"Clean completed\"",
+    "force-clean": "taskkill /f /im \"Covenantrix.exe\" 2>nul && taskkill /f /im \"node.exe\" /fi \"WINDOWTITLE eq *covenantrix*\" 2>nul && takeown /f dist /r /d y >nul 2>&1 && icacls dist /grant administrators:F /t >nul 2>&1 && rimraf dist/ || echo \"Force clean completed\"",
     "test-build": "npm run clean && npm run package:win"
   },
   "keywords": [
@@ -62,7 +73,7 @@
     "appId": "com.randomwilder.covenantrix",
     "productName": "Covenantrix",
     "directories": {
-      "output": "dist/packaged"
+      "output": "dist/release"
     },
     "publish": [
       {

@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { Sidebar, Header } from '@/components/layout';
 import { ChatInterface, DocumentsView, UploadView, AnalyticsView, SearchView, SettingsView } from '@/components/features';
-import { useAppState } from '@/hooks/useAppState';
+import { UpdateNotification } from '@/components/ui';
+import { useAppState } from '@/hooks';
 
 const App: React.FC = () => {
   const { state, setCurrentView, setBackendConnected, setApiKeyConfigured } = useAppState();
@@ -106,6 +107,9 @@ const App: React.FC = () => {
           {renderCurrentView()}
         </main>
       </div>
+      
+      {/* Update notification overlay */}
+      <UpdateNotification />
     </div>
   );
 };

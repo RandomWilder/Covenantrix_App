@@ -32,7 +32,9 @@ export {
     Moon,
     Save,
     AlertCircle,
-    Shield
+    Shield,
+    RefreshCw,
+    X
   } from 'lucide-react';
   
   // Icon size constants for consistency
