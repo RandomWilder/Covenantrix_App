@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Sidebar, Header } from '@/components/layout';
-import { ChatInterface, DocumentsView, UploadView } from '@/components/features';
+import { ChatInterface, DocumentsView, UploadView, AnalyticsView, SearchView, SettingsView } from '@/components/features';
 import { useAppState } from '@/hooks/useAppState';
 
 const App: React.FC = () => {
@@ -55,10 +55,19 @@ const App: React.FC = () => {
     if (!state.isBackendConnected) {
       return 'Backend connection lost - some features may not work';
     }
-    if (!state.isApiKeyConfigured && state.currentView === 'chat') {
+    if (!state.isApiKeyConfigured && (state.currentView === 'chat' || state.currentView === 'search')) {
       return 'API key required for AI features';
     }
-    return 'Professional contract analysis powered by AI';
+    
+    switch (state.currentView) {
+      case 'chat': return 'Intelligent contract analysis and consultation';
+      case 'documents': return 'Manage and organize your contract portfolio';
+      case 'upload': return 'Add new documents for AI processing';
+      case 'analytics': return 'Insights and performance metrics';
+      case 'search': return 'Search through your contracts intelligently';
+      case 'settings': return 'Configure your application preferences';
+      default: return 'Professional contract analysis powered by AI';
+    }
   };
 
   const renderCurrentView = () => {
@@ -70,16 +79,11 @@ const App: React.FC = () => {
       case 'upload':
         return <UploadView />;
       case 'analytics':
+        return <AnalyticsView />;
       case 'search':
+        return <SearchView />;
       case 'settings':
-        return (
-          <div className="h-full flex items-center justify-center text-muted-foreground">
-            <div className="text-center">
-              <h3 className="text-lg font-medium mb-2">{getViewTitle()}</h3>
-              <p>Coming soon</p>
-            </div>
-          </div>
-        );
+        return <SettingsView />;
       default:
         return <ChatInterface />;
     }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { 
   FileText, 
   MessageSquare, 
@@ -6,7 +6,7 @@ import {
   Upload,
   BarChart3,
   Search
-} from 'lucide-react';
+} from '../icons';
 import { clsx } from 'clsx';
 
 export type ViewMode = 'documents' | 'chat' | 'upload' | 'analytics' | 'search' | 'settings';
@@ -56,66 +56,36 @@ const sidebarItems: SidebarItem[] = [
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeItem, onItemSelect }) => {
-  const [isConnected, setIsConnected] = useState(false);
-
-  useEffect(() => {
-    // Check initial connection
-    const checkConnection = async () => {
-      try {
-        const result = await window.electronAPI.testBackend();
-        setIsConnected(result.success);
-      } catch (error) {
-        setIsConnected(false);
-      }
-    };
-
-    checkConnection();
-    
-    // Monitor connection every 10 seconds
-    const interval = setInterval(checkConnection, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <div className="w-64 bg-card border-r border-border h-full flex flex-col">
-      {/* Logo Section */}
+    <aside className="w-64 bg-card border-r border-border h-full flex flex-col">
       <div className="p-6 border-b border-border">
-        <h1 className="text-xl font-bold text-foreground">Covenantrix</h1>
-        <p className="text-sm text-muted-foreground">Contract Intelligence</p>
+        <h1 className="text-2xl font-bold text-foreground">Covenantrix</h1>
+        <p className="text-sm text-muted-foreground mt-1">Contract Intelligence</p>
       </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 p-4">
-        <ul className="space-y-2">
-          {sidebarItems.map((item) => (
-            <li key={item.id}>
-              <button
-                onClick={() => onItemSelect(item.id)}
-                className={clsx(
-                  "w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                  {
-                    "bg-primary text-primary-foreground": activeItem === item.id,
-                    "text-muted-foreground hover:text-foreground hover:bg-accent": activeItem !== item.id
-                  }
-                )}
-              >
-                {item.icon}
-                {item.label}
-              </button>
-            </li>
-          ))}
-        </ul>
+      
+      <nav className="flex-1 p-4 space-y-2">
+        {sidebarItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => onItemSelect(item.id)}
+            className={clsx(
+              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+              activeItem === item.id
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground hover:bg-accent"
+            )}
+          >
+            {item.icon}
+            {item.label}
+          </button>
+        ))}
       </nav>
-
-      {/* Status Section - UPDATED with real status */}
+      
       <div className="p-4 border-t border-border">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <div className={`w-2 h-2 rounded-full ${
-            isConnected ? 'bg-green-500' : 'bg-red-500'
-          }`}></div>
-          {isConnected ? 'Backend Connected' : 'Backend Disconnected'}
+        <div className="text-xs text-muted-foreground">
+          Version 0.5.4
         </div>
       </div>
-    </div>
+    </aside>
   );
 };

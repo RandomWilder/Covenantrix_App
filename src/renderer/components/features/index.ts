@@ -1,3 +1,6 @@
 export { ChatInterface } from './ChatInterface'
 export { DocumentsView } from './DocumentsView'
 export { UploadView } from './UploadView'
+export { SettingsView } from './SettingsView'
+export { AnalyticsView } from './AnalyticsView'
+export { SearchView } from './SearchView'

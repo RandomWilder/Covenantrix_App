@@ -1,6 +1,6 @@
 import React from 'react';
-import { Moon, Sun } from 'lucide-react';
-import { Button } from '@/components/ui';
+import { Bell, Search, Settings } from '../icons';
+import { Button } from '@/components/ui/Button';
 
 interface HeaderProps {
   title: string;
@@ -8,31 +8,27 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
-  const [isDark, setIsDark] = React.useState(false);
-
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    // Theme switching will be implemented in Phase 3
-    document.documentElement.classList.toggle('dark');
-  };
-
   return (
-    <header className="h-16 border-b border-border bg-background px-6 flex items-center justify-between">
-      <div>
-        <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-        {subtitle && (
-          <p className="text-sm text-muted-foreground">{subtitle}</p>
-        )}
-      </div>
-
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleTheme}
-        >
-          {isDark ? <Sun size={16} /> : <Moon size={16} />}
-        </Button>
+    <header className="h-16 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex h-16 items-center justify-between px-6">
+        <div className="flex flex-col">
+          <h1 className="text-xl font-semibold text-foreground">{title}</h1>
+          {subtitle && (
+            <p className="text-sm text-muted-foreground">{subtitle}</p>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="sm">
+            <Search size={16} />
+          </Button>
+          <Button variant="ghost" size="sm">
+            <Bell size={16} />
+          </Button>
+          <Button variant="ghost" size="sm">
+            <Settings size={16} />
+          </Button>
+        </div>
       </div>
     </header>
   );
