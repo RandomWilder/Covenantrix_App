@@ -15,8 +15,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Document processing (NEW - minimal)
   uploadDocument: (fileBuffer, fileName) => ipcRenderer.invoke('upload-document', fileBuffer, fileName),
   
-  // SIMPLE Update checking (manual only)
+  // Auto-updater methods
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  downloadUpdate: () => ipcRenderer.invoke('download-update'),
+  installUpdate: () => ipcRenderer.invoke('install-update'),
+  
+  // Listen for updater messages from main process
+  onUpdaterMessage: (callback) => {
+    ipcRenderer.on('updater-message', (event, data) => callback(data));
+  },
+  removeUpdaterListener: () => {
+    ipcRenderer.removeAllListeners('updater-message');
+  },
   
   // Platform info
   platform: process.platform,

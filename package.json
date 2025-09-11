@@ -1,17 +1,24 @@
 {
   "name": "covenantrix",
-  "version": "0.5.4",
+  "version": "1.0.1",
   "description": "Contract Intelligence Platform - Proof of Concept",
   "main": "main.js",
   "homepage": "https://github.com/RandomWilder/Covenantrix_App",
   "scripts": {
-    "start": "cross-env NODE_ENV=development electron .",
+    "start": "cross-env NODE_ENV=development electron . --enable-logging",
     "dev": "cross-env NODE_ENV=development electron . --enable-logging",
+    "dev:react": "vite",
+    "build:react": "tsc && vite build --outDir ../../dist-react",
+    "dev:electron": "cross-env NODE_ENV=development electron .",
     "build": "echo 'Building application...'",
     "package:win": "electron-builder --win --x64 --publish never",
     "package:mac": "electron-builder --mac --publish never",
     "package:linux": "electron-builder --linux --publish never",
     "package:all": "electron-builder --win --mac --publish never",
+    "release:win": "electron-builder --win --x64 --publish always",
+    "release:mac": "electron-builder --mac --publish always",
+    "release:linux": "electron-builder --linux --publish always",
+    "release:all": "electron-builder --win --mac --linux --publish always",
     "postinstall": "electron-builder install-app-deps",
     "clean": "rimraf dist/",
     "test-build": "npm run clean && npm run package:win"
@@ -30,14 +37,26 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.16",
     "cross-env": "^7.0.3",
     "electron": "^27.0.0",
     "electron-builder": "^24.6.4",
-    "rimraf": "^5.0.5"
+    "postcss": "^8.4.32",
+    "rimraf": "^5.0.5",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10"
   },
   "dependencies": {
+    "clsx": "^2.0.0",
     "form-data": "^4.0.4",
-    "node-fetch": "^3.3.2"
+    "lucide-react": "^0.295.0",
+    "node-fetch": "^3.3.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "build": {
     "appId": "com.randomwilder.covenantrix",
@@ -45,6 +64,13 @@
     "directories": {
       "output": "dist/packaged"
     },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "RandomWilder",
+        "repo": "Covenantrix_App"
+      }
+    ],
     "extraResources": [
       {
         "from": "dist/python-dist",
@@ -54,19 +80,21 @@
       {
         "from": "backend",
         "to": "app-backend",
-        "filter": ["**/*", "!**/rag_storage/**"]
+        "filter": [
+          "**/*",
+          "!**/rag_storage/**"
+        ]
       }
     ],
     "files": [
       "main.js",
       "preload.js",
-      "renderer/*.html",
-      "renderer/*.js",
-      "renderer/*.css",
+      "dist-react/**/*",
       "assets/**/*",
       "node_modules/**/*",
       "!backend/**/*",
-      "!dist/python-dist/**/*"
+      "!dist/python-dist/**/*",
+      "!renderer/**/*"
     ],
     "win": {
       "target": {

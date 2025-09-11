@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, autoUpdater } = require('electron');
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
@@ -193,65 +193,36 @@ async function createWindow() {
   console.log('🪟 Creating Electron window...');
   
   try {
-    // Create the browser window
     mainWindow = new BrowserWindow({
-      width: 1200,
-      height: 800,
-      minWidth: 800,
-      minHeight: 600,
+      width: 1400,
+      height: 900,
+      minWidth: 1200,
+      minHeight: 700,
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
         enableRemoteModule: false,
         preload: path.join(__dirname, 'preload.js')
       },
-      show: true, // Show immediately for debugging
+      show: true,
       icon: isDev ? undefined : path.join(__dirname, 'assets', 'icon.png')
     });
 
-    console.log('🪟 BrowserWindow created successfully');
-
-    // Check if the HTML file exists
-    const indexPath = path.join(__dirname, 'renderer', 'index.html');
-    console.log('📁 Looking for HTML file at:', indexPath);
-    
-    if (!fs.existsSync(indexPath)) {
-      console.error('❌ HTML file not found at:', indexPath);
-      throw new Error(`HTML file not found: ${indexPath}`);
-    }
-    console.log('✅ HTML file exists');
-
-    // Load the app
-    await mainWindow.loadFile(indexPath);
-    console.log('✅ HTML file loaded successfully');
-
-    // Open DevTools in development
+    // UPDATED: Load React app in development, built app in production
     if (isDev) {
+      await mainWindow.loadURL('http://localhost:3000');
       mainWindow.webContents.openDevTools();
-      console.log('🔧 DevTools opened');
+    } else {
+      // Production: Load React build instead of old renderer
+      const indexPath = path.join(__dirname, 'dist-react', 'index.html');
+      await mainWindow.loadFile(indexPath);
     }
 
-    // Handle window events
     mainWindow.on('closed', () => {
-      console.log('🪟 Window closed');
       mainWindow = null;
     });
 
-    mainWindow.on('ready-to-show', () => {
-      console.log('🎉 Window ready-to-show event fired');
-    });
-
-    mainWindow.webContents.on('did-finish-load', () => {
-      console.log('📄 Page finished loading');
-    });
-
-    mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
-      console.error('❌ Page failed to load:', errorCode, errorDescription);
-    });
-
-    console.log('🪟 Window setup complete');
     return mainWindow;
-
   } catch (error) {
     console.error('❌ Error creating window:', error);
     throw error;
@@ -268,6 +239,9 @@ app.whenReady().then(async () => {
     
     // Then create window
     await createWindow();
+    
+    // Setup auto-updater after everything is ready
+    setupAutoUpdater();
     
     console.log('Application startup complete!');
   } catch (error) {
@@ -417,44 +391,160 @@ ipcMain.handle('upload-document', async (event, fileBuffer, fileName) => {
 });
 
 
-// SIMPLE Manual Update Check (GitHub API only)
+// Auto-Updater Configuration and Event Handlers
+let updateDownloaded = false;
+let updateAvailable = false;
+
+// Configure auto-updater for production only
+if (!isDev) {
+  // Use update.electronjs.org for GitHub releases
+  const server = 'https://update.electronjs.org';
+  const url = `${server}/RandomWilder/Covenantrix_App/${process.platform}-${process.arch}/${app.getVersion()}`;
+  
+  autoUpdater.setFeedURL({ url });
+  
+  console.log('Auto-updater configured with URL:', url);
+}
+
+// Auto-updater event handlers
+autoUpdater.on('checking-for-update', () => {
+  console.log('Checking for update...');
+  if (mainWindow) {
+    mainWindow.webContents.send('updater-message', {
+      type: 'checking-for-update'
+    });
+  }
+});
+
+autoUpdater.on('update-available', (info) => {
+  console.log('Update available:', info);
+  updateAvailable = true;
+  
+  if (mainWindow) {
+    mainWindow.webContents.send('updater-message', {
+      type: 'update-available',
+      info: info
+    });
+  }
+});
+
+autoUpdater.on('update-not-available', (info) => {
+  console.log('Update not available:', info);
+  updateAvailable = false;
+  
+  if (mainWindow) {
+    mainWindow.webContents.send('updater-message', {
+      type: 'update-not-available',
+      info: info
+    });
+  }
+});
+
+autoUpdater.on('error', (err) => {
+  console.error('Auto-updater error:', err);
+  if (mainWindow) {
+    mainWindow.webContents.send('updater-message', {
+      type: 'error',
+      error: err.message
+    });
+  }
+});
+
+autoUpdater.on('download-progress', (progressObj) => {
+  console.log(`Download progress: ${progressObj.percent}%`);
+  if (mainWindow) {
+    mainWindow.webContents.send('updater-message', {
+      type: 'download-progress',
+      progress: {
+        percent: Math.round(progressObj.percent),
+        bytesPerSecond: progressObj.bytesPerSecond,
+        transferred: progressObj.transferred,
+        total: progressObj.total
+      }
+    });
+  }
+});
+
+autoUpdater.on('update-downloaded', (info) => {
+  console.log('Update downloaded:', info);
+  updateDownloaded = true;
+  
+  if (mainWindow) {
+    mainWindow.webContents.send('updater-message', {
+      type: 'update-downloaded',
+      info: info
+    });
+  }
+});
+
+// IPC handlers for auto-updater
 ipcMain.handle('check-for-updates', async () => {
   if (isDev) {
     return { success: false, error: 'Updates not available in development mode' };
   }
   
   try {
-    const currentVersion = require('./package.json').version;
-    const response = await fetch('https://api.github.com/repos/RandomWilder/Covenantrix_App/releases/latest');
-    
-    if (!response.ok) {
-      throw new Error('Failed to check for updates');
-    }
-    
-    const release = await response.json();
-    const latestVersion = release.tag_name.replace('v', '');
-    
-    if (latestVersion !== currentVersion) {
-      return {
-        success: true,
-        updateAvailable: true,
-        currentVersion,
-        latestVersion,
-        downloadUrl: release.html_url,
-        releaseNotes: release.body || 'No release notes available'
-      };
-    } else {
-      return {
-        success: true,
-        updateAvailable: false,
-        currentVersion,
-        latestVersion
-      };
-    }
+    autoUpdater.checkForUpdates();
+    return { 
+      success: true, 
+      message: 'Checking for updates...',
+      currentVersion: app.getVersion()
+    };
   } catch (error) {
     return { success: false, error: error.message };
   }
 });
+
+ipcMain.handle('download-update', async () => {
+  if (isDev) {
+    return { success: false, error: 'Updates not available in development mode' };
+  }
+  
+  if (!updateAvailable) {
+    return { success: false, error: 'No update available to download' };
+  }
+  
+  try {
+    // Note: Electron's autoUpdater automatically downloads the update when available
+    // This handler is for explicit user-triggered downloads if needed
+    return { success: true, message: 'Update download started...' };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('install-update', async () => {
+  if (isDev) {
+    return { success: false, error: 'Updates not available in development mode' };
+  }
+  
+  if (!updateDownloaded) {
+    return { success: false, error: 'No update downloaded yet' };
+  }
+  
+  try {
+    // This will quit the app and install the update
+    autoUpdater.quitAndInstall();
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Auto-check for updates (integrated into existing app startup)
+function setupAutoUpdater() {
+  if (!isDev) {
+    // Auto-check for updates 30 seconds after startup
+    setTimeout(() => {
+      autoUpdater.checkForUpdates();
+    }, 30000);
+    
+    // Check every 4 hours
+    setInterval(() => {
+      autoUpdater.checkForUpdates();
+    }, 4 * 60 * 60 * 1000);
+  }
+}
 
 // Add fetch polyfill for older Node versions
 if (!global.fetch) {
