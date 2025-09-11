@@ -215,7 +215,7 @@ export const SettingsView: React.FC = () => {
             <div className="space-y-3">
               <div className="flex justify-between items-center py-2">
                 <span className="text-sm text-muted-foreground">Version</span>
-                <span className="text-sm font-medium">1.0.6</span>
+                <span className="text-sm font-medium">1.0.7</span>
               </div>
               <div className="flex justify-between items-center py-2">
                 <span className="text-sm text-muted-foreground">Backend Status</span>
