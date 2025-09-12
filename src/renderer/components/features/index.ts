@@ -1,5 +1,7 @@
 export { ChatInterface } from './ChatInterface'
 export { DocumentsView } from './DocumentsView'
+export { DocumentCard } from './DocumentCard'
+export { DocumentViewer } from './DocumentViewer'
 export { UploadView } from './UploadView'
 export { SettingsView } from './SettingsView'
 export { AnalyticsView } from './AnalyticsView'

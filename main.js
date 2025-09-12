@@ -390,6 +390,59 @@ ipcMain.handle('upload-document', async (event, fileBuffer, fileName) => {
   }
 });
 
+// Document management handlers
+ipcMain.handle('list-documents', async () => {
+  try {
+    const response = await fetch(`http://${PYTHON_HOST}:${PYTHON_PORT}/documents/list`);
+    const data = await response.json();
+    
+    if (response.ok) {
+      return { success: true, data };
+    } else {
+      return { success: false, error: data.detail || 'Failed to list documents' };
+    }
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('get-document-details', async (event, documentId) => {
+  try {
+    const response = await fetch(`http://${PYTHON_HOST}:${PYTHON_PORT}/documents/${documentId}/details`);
+    const data = await response.json();
+    
+    if (response.ok) {
+      return { success: true, data };
+    } else {
+      return { success: false, error: data.detail || 'Failed to get document details' };
+    }
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('delete-document', async (event, documentId, force) => {
+  try {
+    const url = new URL(`http://${PYTHON_HOST}:${PYTHON_PORT}/documents/${documentId}`);
+    if (force) {
+      url.searchParams.append('force', 'true');
+    }
+    
+    const response = await fetch(url.toString(), {
+      method: 'DELETE'
+    });
+    const data = await response.json();
+    
+    if (response.ok) {
+      return { success: true, data };
+    } else {
+      return { success: false, error: data.detail || 'Failed to delete document' };
+    }
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
 
 // Auto-Updater Configuration and Event Handlers
 let updateDownloaded = false;

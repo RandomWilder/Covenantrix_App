@@ -14,6 +14,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   // Document processing (NEW - minimal)
   uploadDocument: (fileBuffer, fileName) => ipcRenderer.invoke('upload-document', fileBuffer, fileName),
+  listDocuments: () => ipcRenderer.invoke('list-documents'),
+  getDocumentDetails: (documentId) => ipcRenderer.invoke('get-document-details', documentId),
+  deleteDocument: (documentId, force) => ipcRenderer.invoke('delete-document', documentId, force),
   
   // Auto-updater methods
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),

@@ -8,6 +8,9 @@ declare global {
         checkAPIKeyStatus: () => Promise<{ success: boolean; data?: any; error?: string }>;
         removeAPIKey: () => Promise<{ success: boolean; data?: any; error?: string }>;
         uploadDocument: (fileBuffer: ArrayBuffer, fileName: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+        listDocuments: () => Promise<{ success: boolean; data?: any; error?: string }>;
+        getDocumentDetails: (documentId: string) => Promise<{ success: boolean; data?: any; error?: string }>;
+        deleteDocument: (documentId: string, force?: boolean) => Promise<{ success: boolean; data?: any; error?: string }>;
         
         // Auto-updater methods (matching preload.js)
         checkForUpdates: () => Promise<{ success: boolean; data?: any; error?: string }>;
@@ -50,6 +53,18 @@ declare global {
     async uploadDocument(file: File) {
       const arrayBuffer = await file.arrayBuffer();
       return window.electronAPI.uploadDocument(arrayBuffer, file.name);
+    }
+
+    async listDocuments() {
+      return window.electronAPI.listDocuments();
+    }
+
+    async getDocumentDetails(documentId: string) {
+      return window.electronAPI.getDocumentDetails(documentId);
+    }
+
+    async deleteDocument(documentId: string, force?: boolean) {
+      return window.electronAPI.deleteDocument(documentId, force);
     }
   }
   

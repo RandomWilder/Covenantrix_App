@@ -83,7 +83,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeItem, onItemSelect }) =>
       
       <div className="p-4 border-t border-border">
         <div className="text-xs text-muted-foreground">
-          Version 1.0.8
+          Version 1.0.9
         </div>
       </div>
     </aside>
