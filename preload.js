@@ -18,18 +18,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getDocumentDetails: (documentId) => ipcRenderer.invoke('get-document-details', documentId),
   deleteDocument: (documentId, force) => ipcRenderer.invoke('delete-document', documentId, force),
   
-  // Auto-updater methods
-  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
-  downloadUpdate: () => ipcRenderer.invoke('download-update'),
-  installUpdate: () => ipcRenderer.invoke('install-update'),
-  
-  // Listen for updater messages from main process
-  onUpdaterMessage: (callback) => {
-    ipcRenderer.on('updater-message', (event, data) => callback(data));
-  },
-  removeUpdaterListener: () => {
-    ipcRenderer.removeAllListeners('updater-message');
-  },
   
   // Platform info
   platform: process.platform,

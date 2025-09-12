@@ -1,4 +1,5 @@
-const { app, BrowserWindow, ipcMain, dialog, autoUpdater } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { updateElectronApp } = require('update-electron-app');
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
@@ -241,7 +242,12 @@ app.whenReady().then(async () => {
     await createWindow();
     
     // Setup auto-updater after everything is ready
-    setupAutoUpdater();
+    if (!isDev) {
+      updateElectronApp({
+        updateInterval: '1 hour',
+        notifyUser: true
+      });
+    }
     
     console.log('Application startup complete!');
   } catch (error) {
@@ -444,160 +450,10 @@ ipcMain.handle('delete-document', async (event, documentId, force) => {
 });
 
 
-// Auto-Updater Configuration and Event Handlers
-let updateDownloaded = false;
-let updateAvailable = false;
 
-// Configure auto-updater for production only
-if (!isDev) {
-  // Use update.electronjs.org for GitHub releases
-  const server = 'https://update.electronjs.org';
-  const url = `${server}/RandomWilder/Covenantrix_App/${process.platform}-${process.arch}/${app.getVersion()}`;
-  
-  autoUpdater.setFeedURL({ url });
-  
-  console.log('Auto-updater configured with URL:', url);
-}
 
-// Auto-updater event handlers
-autoUpdater.on('checking-for-update', () => {
-  console.log('Checking for update...');
-  if (mainWindow) {
-    mainWindow.webContents.send('updater-message', {
-      type: 'checking-for-update'
-    });
-  }
-});
 
-autoUpdater.on('update-available', (info) => {
-  console.log('Update available:', info);
-  updateAvailable = true;
-  
-  if (mainWindow) {
-    mainWindow.webContents.send('updater-message', {
-      type: 'update-available',
-      info: info
-    });
-  }
-});
 
-autoUpdater.on('update-not-available', (info) => {
-  console.log('Update not available:', info);
-  updateAvailable = false;
-  
-  if (mainWindow) {
-    mainWindow.webContents.send('updater-message', {
-      type: 'update-not-available',
-      info: info
-    });
-  }
-});
-
-autoUpdater.on('error', (err) => {
-  console.error('Auto-updater error:', err);
-  if (mainWindow) {
-    mainWindow.webContents.send('updater-message', {
-      type: 'error',
-      error: err.message
-    });
-  }
-});
-
-autoUpdater.on('download-progress', (progressObj) => {
-  console.log(`Download progress: ${progressObj.percent}%`);
-  if (mainWindow) {
-    mainWindow.webContents.send('updater-message', {
-      type: 'download-progress',
-      progress: {
-        percent: Math.round(progressObj.percent),
-        bytesPerSecond: progressObj.bytesPerSecond,
-        transferred: progressObj.transferred,
-        total: progressObj.total
-      }
-    });
-  }
-});
-
-autoUpdater.on('update-downloaded', (info) => {
-  console.log('Update downloaded:', info);
-  updateDownloaded = true;
-  
-  if (mainWindow) {
-    mainWindow.webContents.send('updater-message', {
-      type: 'update-downloaded',
-      info: info
-    });
-  }
-});
-
-// IPC handlers for auto-updater
-ipcMain.handle('check-for-updates', async () => {
-  if (isDev) {
-    return { success: false, error: 'Updates not available in development mode' };
-  }
-  
-  try {
-    autoUpdater.checkForUpdates();
-    return { 
-      success: true, 
-      message: 'Checking for updates...',
-      currentVersion: app.getVersion()
-    };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-});
-
-ipcMain.handle('download-update', async () => {
-  if (isDev) {
-    return { success: false, error: 'Updates not available in development mode' };
-  }
-  
-  if (!updateAvailable) {
-    return { success: false, error: 'No update available to download' };
-  }
-  
-  try {
-    // Note: Electron's autoUpdater automatically downloads the update when available
-    // This handler is for explicit user-triggered downloads if needed
-    return { success: true, message: 'Update download started...' };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-});
-
-ipcMain.handle('install-update', async () => {
-  if (isDev) {
-    return { success: false, error: 'Updates not available in development mode' };
-  }
-  
-  if (!updateDownloaded) {
-    return { success: false, error: 'No update downloaded yet' };
-  }
-  
-  try {
-    // This will quit the app and install the update
-    autoUpdater.quitAndInstall();
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-});
-
-// Auto-check for updates (integrated into existing app startup)
-function setupAutoUpdater() {
-  if (!isDev) {
-    // Auto-check for updates 30 seconds after startup
-    setTimeout(() => {
-      autoUpdater.checkForUpdates();
-    }, 30000);
-    
-    // Check every 4 hours
-    setInterval(() => {
-      autoUpdater.checkForUpdates();
-    }, 4 * 60 * 60 * 1000);
-  }
-}
 
 // Add fetch polyfill for older Node versions
 if (!global.fetch) {
